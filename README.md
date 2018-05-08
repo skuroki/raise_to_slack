@@ -1,3 +1,5 @@
+[![Gem Version](https://badge.fury.io/rb/raise_to_slack.svg)](https://badge.fury.io/rb/raise_to_slack)
+
 # RaiseToSlack
 
 Simply raise error messsage to slack
