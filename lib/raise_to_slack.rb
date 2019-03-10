@@ -33,13 +33,17 @@ module RaiseToSlack
     http = Net::HTTP.new(url.host, url.port)
     http.use_ssl = true
     res = http.start {|http| http.request(req) }
-    res.value
+    STDERR.puts 'upload response' if debug?
+    STDERR.puts res.body if debug?
 
-    file_id = JSON.parse(res.body)['file']['id']
+    thread_ts = JSON.parse(res.body)['file']['shares'].values[0].values[0][0]['ts']
+    channel_id = JSON.parse(res.body)['file']['shares'].values[0].keys[0]
     res = Net::HTTP.post_form(
-      URI.parse('https://slack.com/api/files.comments.add'),
-      { 'file' => file_id, 'comment' => e.message, 'token' => oauth2_token }
+      URI.parse('https://slack.com/api/chat.postMessage'),
+      { 'token' => oauth2_token, 'channel' => channel_id, 'text' => e.message, 'reply_broadcast' => 'true', 'thread_ts' => thread_ts }
     )
+    STDERR.puts 'post response' if debug?
+    STDERR.puts res.body if debug?
     res.value
   end
 
@@ -49,5 +53,9 @@ module RaiseToSlack
 
   def self.channel_name
     ENV['RAISE_TO_SLACK_CHANNEL_NAME']
+  end
+
+  def self.debug?
+    ENV['RAISE_TO_SLACK_DEBUG']
   end
 end
